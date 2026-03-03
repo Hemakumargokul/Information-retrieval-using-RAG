@@ -24,10 +24,10 @@ class FAISSStore(BaseVectorStore):
             self._store.add_documents(documents)
         self._store.save_local(_INDEX_PATH)
     
-    def get_retriever(self, k = 5) -> VectorStoreRetriever:
+    def get_retriever(self, score_threshold: float = 0.0) -> VectorStoreRetriever:
         if self._store is None:
             raise RuntimeError("No documents to retrieve")
-        return self._store.as_retriever(search_kwargs={"k": k})
+        return self._store.as_retriever(search_type="similarity_score_threshold", search_kwargs={"score_threshold": score_threshold})
     
     @property
     def store_name(self):

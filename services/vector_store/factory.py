@@ -9,7 +9,7 @@ _PROVIDERS:dict[str, BaseVectorStore] = {
 } 
 
 @lru_cache(maxsize=None)
-def get_vector_store(store: str = "faiss", embedding_provider: str = "qwen") -> BaseVectorStore:
+def get_vector_store(store: str = "faiss", embedding_provider: str = "openai") -> BaseVectorStore:
     embeddings = get_embeddings(embedding_provider)
     if store not in _PROVIDERS:
         raise ValueError(f"Unsupported vector store: '{store}'")

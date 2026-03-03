@@ -8,7 +8,7 @@ class BaseVectorStore(ABC):
         pass
 
     @abstractmethod
-    def get_retriever(self, k: int = 4) -> VectorStoreRetriever:
+    def get_retriever(self, score_threshold: float = 0.5) -> VectorStoreRetriever:
         pass
 
     @property

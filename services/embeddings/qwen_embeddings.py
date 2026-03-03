@@ -15,7 +15,7 @@ class QwenEmbeddings(Embeddings):
 
 
 class QwenEmbeddingProvider(BaseEmbeddingsProvider):
-    def __init__(self, model: str = "Qwen/Qwen3-Embedding-4B"):
+    def __init__(self, model: str = "Qwen/Qwen3-Embedding-8B"):
         self._model = model
 
     def get_embeddings(self) -> Embeddings:

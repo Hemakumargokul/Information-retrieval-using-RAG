@@ -1,6 +1,12 @@
+import logging
 from fastapi import FastAPI
 from routers import chat, documents
 import uvicorn
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(name)s %(levelname)s %(message)s"
+)
 
 app = FastAPI(title="ChatBot API", version = "1.0.0")
 
