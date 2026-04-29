@@ -9,8 +9,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.post("/message", response_model=ChatResponse)
-async def send_message(request: ChatRequest, llm = Depends(get_llm), vector_store = Depends(get_vector_store)):
-    logger.info("Incoming request: %s", request.message)
-    reply = await rag_service.ask(request.message, llm, vector_store)
+async def send_message(request: ChatRequest, llm = Depends(get_llm)):
+    logger.info("Incoming request: %s (strategy=%s)", request.message, request.strategy)
+    vector_store = get_vector_store(request.strategy)
+    reply = await rag_service.ask(request.message, llm, vector_store, request.strategy)
     logger.info("Outgoing reply: %s", reply)
     return ChatResponse(reply=reply)

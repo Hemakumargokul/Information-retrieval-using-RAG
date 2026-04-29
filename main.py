@@ -1,14 +1,31 @@
 import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from routers import chat, documents
+from services.llm.factory import get_llm
+from services.vector_store.factory import get_vector_store
+from services.ingestion_service import get_pipeline_v1, get_pipeline_v2
 import uvicorn
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s %(name)s %(levelname)s %(message)s"
+    format="%(asctime)s %(name)s %(levelname)s %(message)s",
+    force=True
 )
 
-app = FastAPI(title="ChatBot API", version = "1.0.0")
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    logger = logging.getLogger(__name__)
+    logger.info("Initializing dependencies...")
+    get_llm()
+    get_vector_store("v1")
+    get_vector_store("v2")
+    get_pipeline_v1()
+    get_pipeline_v2()
+    logger.info("All dependencies ready.")
+    yield
+
+app = FastAPI(title="ChatBot API", version="1.0.0", lifespan=lifespan)
 
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(documents.router, prefix="/documents", tags=["documents"])

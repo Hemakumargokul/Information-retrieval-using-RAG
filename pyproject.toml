@@ -16,11 +16,19 @@ langchain-core = "^0.3.0"
 langchain-openai = "^0.2.0"
 langchain-community = "^0.3.0"
 langchain-text-splitters = "^0.3.0"
-openai = "^1.0.0"
+openai = ">=1.66.0"
 faiss-cpu = "^1.9.0"
 pypdf = "^5.0.0"
 sentence-transformers = "^3.0.0"
 hf_xet = "*"
+llama-index-core = "^0.12.0"
+llama-index-readers-file = "^0.4.0"
+llama-index-embeddings-openai = "^0.3.0"
+ddgs = "*"
+beautifulsoup4 = "^4.14.3"
+pymupdf4llm = "^0.3.4"
+rank-bm25 = "^0.2.2"
+
 
 
 [build-system]

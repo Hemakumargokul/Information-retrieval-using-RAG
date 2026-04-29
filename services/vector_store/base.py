@@ -8,7 +8,15 @@ class BaseVectorStore(ABC):
         pass
 
     @abstractmethod
-    def get_retriever(self, score_threshold: float = 0.5) -> VectorStoreRetriever:
+    def get_retriever(self, score_threshold: float = 0.0) -> VectorStoreRetriever:
+        pass
+
+    @abstractmethod
+    def add_embeddings(self, texts_and_embeddings: list[tuple[str, list[float]]], metadatas: list[dict]) -> None:
+        pass
+
+    @abstractmethod
+    def get_all_documents(self) -> list[Document]:
         pass
 
     @property
