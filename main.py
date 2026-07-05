@@ -1,7 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from routers import chat, documents
+from routers import chat, documents, health
 from services.llm.factory import get_llm
 from services.vector_store.factory import get_vector_store
 from services.ingestion_service import get_pipeline_v1, get_pipeline_v2
@@ -29,6 +29,7 @@ app = FastAPI(title="ChatBot API", version="1.0.0", lifespan=lifespan)
 
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(documents.router, prefix="/documents", tags=["documents"])
+app.include_router(health.router, prefix="/health", tags=["health"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
