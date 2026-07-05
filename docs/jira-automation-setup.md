@@ -1,17 +1,17 @@
 # Jira → GitHub → Claude Code automation
 
-When a Jira ticket is **created**, a Jira Automation rule fires a GitHub
-`repository_dispatch` event. That triggers the
+When a Jira ticket is **assigned to the "Claude Code" user**, a Jira Automation
+rule fires a GitHub `repository_dispatch` event. That triggers the
 [`Jira Ticket to PR (Claude)`](../.github/workflows/jira-to-pr.yml) workflow,
 which asks **Claude Code** to implement the ticket and opens a **pull request**
 with the changes.
 
 ```
-Jira ticket created
-      │  (Automation rule: "Send web request")
+Jira ticket assigned to "Claude Code"
+      │  (Automation rule: trigger = assignee changed, condition = assignee is Claude Code)
       ▼
 POST https://api.github.com/repos/Hemakumargokul/Information-retrieval-using-RAG/dispatches
-      │  event_type: jira-ticket-created  +  client_payload {key, summary, description, url}
+      │  event_type: jira-ticket-created  +  client_payload {key, summary, description, assignee, url}
       ▼
 GitHub Actions workflow (.github/workflows/jira-to-pr.yml)
       │
@@ -61,12 +61,39 @@ In Jira Cloud (`https://hemakumargokul.atlassian.net`):
 **Project settings → Automation → Create rule** (or global **Automation** at
 `/jira/settings/automation`).
 
+### 2a. Create the "Claude Code" assignee (one-time)
+
+The automation is **opt-in**: it only runs when you assign a ticket to a
+dedicated user. Assignees must be real Jira accounts, so create one:
+
+1. **Settings (gear) → User management** (`https://admin.atlassian.com`) →
+   **Invite users**.
+2. Name: **Claude Code**, email: an address you control (an alias like
+   `you+claude@gmail.com` works). On the Free plan this counts toward the
+   10-user limit.
+3. Add the user to the project so it appears in the Assignee dropdown
+   (**Project settings → Access / People → Add people**).
+
+> No spare seat? Use a **label** (e.g. `claude`) instead: trigger on
+> **Field value changed → Labels** with a condition that the label contains
+> `claude`. Everything else below is identical.
+
 ### Trigger
 
-- **Issue created**
+- **Field value changed**
+  - **Fields to monitor for changes:** `Assignee`
+  - **Change type:** `Value added or changed`
+  - (Runs whenever a ticket is (re)assigned — including on creation if assigned then.)
 
-*(Optional) Add a condition* to only run for certain issue types, e.g.
-**Issue fields condition → Issue Type → is one of → Task, Story**.
+### Condition — only for tickets assigned to Claude Code
+
+- **Add component → IF: Add a condition → Issue fields condition**
+  - **Field:** `Assignee`
+  - **Condition:** `equals`
+  - **Value:** `Claude Code`
+
+*(Optional) also gate on issue type:* another **Issue fields condition →
+Issue Type → is one of → Task, Story**.
 
 ### Action: Send web request
 
@@ -95,6 +122,7 @@ In Jira Cloud (`https://hemakumargokul.atlassian.net`):
       "summary": "{{issue.summary.jsonEncode}}",
       "description": "{{issue.description.jsonEncode}}",
       "issue_type": "{{issue.issueType.name.jsonEncode}}",
+      "assignee": "{{issue.assignee.displayName.jsonEncode}}",
       "issue_url": "https://hemakumargokul.atlassian.net/browse/{{issue.key}}"
     }
   }
