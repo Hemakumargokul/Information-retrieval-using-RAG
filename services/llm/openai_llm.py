@@ -1,3 +1,4 @@
+"""OpenAI chat-LLM provider (gpt-4o-mini by default)."""
 from langchain_openai import ChatOpenAI
 from langchain_core.language_models import BaseChatModel
 

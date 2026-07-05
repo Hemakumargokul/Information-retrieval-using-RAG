@@ -1,3 +1,4 @@
+"""OpenAI embeddings provider (text-embedding-3-small by default)."""
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.embeddings import Embeddings
 

@@ -1,3 +1,4 @@
+"""Application entrypoint: configures logging, wires routers, and warms up dependencies."""
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -15,6 +16,8 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    # Eagerly build the cached singletons at startup so the first request doesn't
+    # pay the cost of loading models, indexes, and pipelines.
     logger = logging.getLogger(__name__)
     logger.info("Initializing dependencies...")
     get_llm()
@@ -27,6 +30,7 @@ async def lifespan(_app: FastAPI):
 
 app = FastAPI(title="ChatBot API", version="1.0.0", lifespan=lifespan)
 
+# Mount the feature routers under their URL prefixes.
 app.include_router(chat.router, prefix="/chat", tags=["chat"])
 app.include_router(documents.router, prefix="/documents", tags=["documents"])
 
