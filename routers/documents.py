@@ -1,3 +1,4 @@
+"""Document endpoints: ingest PDFs into the vector store for later retrieval."""
 import logging
 from fastapi import APIRouter, HTTPException
 from services.vector_store.factory import get_vector_store
@@ -10,10 +11,12 @@ router = APIRouter()
 @router.post("/ingest", response_model=IngestResponse)
 def ingest_documents(request: IngestRequest):
     try:
+        # Select the store and matching ingestion pipeline for the requested strategy.
         vector_store = get_vector_store(request.strategy)
         pipeline = get_pipeline_v2() if request.strategy == "v2" else get_pipeline_v1()
         count = ingest(request.directory, vector_store, pipeline, request.strategy)
         return IngestResponse(chunks_ingested=count)
     except ValueError as e:
+        # Surface expected input errors (e.g. no PDFs found) as a 400 instead of a 500.
         logger.error("Ingest failed: %s", e)
         raise HTTPException(status_code=400, detail=str(e))

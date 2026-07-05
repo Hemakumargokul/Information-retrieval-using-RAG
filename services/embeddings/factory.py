@@ -1,8 +1,10 @@
+"""Factory that resolves an embeddings backend by name from a provider registry."""
 from langchain_core.embeddings import Embeddings
 from services.embeddings.base import BaseEmbeddingsProvider
 from services.embeddings.openai_embeddings import OpenAIEmbeddingProvider
 from services.embeddings.qwen_embeddings import QwenEmbeddingProvider
 
+# Registry of available embeddings providers keyed by name; add new backends here.
 _PROVIDERS: dict[str, BaseEmbeddingsProvider] = {
     "openai": OpenAIEmbeddingProvider(),
     "qwen": QwenEmbeddingProvider(),
