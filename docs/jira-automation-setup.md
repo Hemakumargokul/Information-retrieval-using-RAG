@@ -139,6 +139,9 @@ curl -X POST \
 
 A `204 No Content` means the dispatch was accepted — check the **Actions** tab.
 
+> **Verified:** the token → dispatch → Claude Code → PR flow was validated
+> end-to-end by test ticket **KAN-1** ("token test").
+
 ### Option C — end-to-end
 
 Create a real ticket in Jira. Within a minute you should see a workflow run and,
