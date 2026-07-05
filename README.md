@@ -2,6 +2,9 @@
 
 A Retrieval-Augmented Generation chatbot built with FastAPI, LangChain, and OpenAI. Supports dual retrieval strategies for A/B comparison: a standard chunking approach (v1) and a layout-aware hybrid retrieval approach (v2).
 
+> **Automation:** Creating a Jira ticket automatically opens a PR implemented by
+> Claude Code. See [`docs/jira-automation-setup.md`](docs/jira-automation-setup.md).
+
 ## Architecture
 
 ```
