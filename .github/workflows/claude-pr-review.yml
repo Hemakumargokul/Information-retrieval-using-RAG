@@ -16,19 +16,22 @@ permissions:
   contents: read
   pull-requests: write
   issues: write
-  id-token: write
 
 concurrency:
-  group: claude-review-${{ github.event.pull_request.number || github.event.issue.number }}
-  cancel-in-progress: true
+  # Separate auto-review (pull_request) from on-demand review (comments) so one
+  # doesn't cancel the other; don't cancel an in-flight review that may still post.
+  group: claude-review-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: false
 
 jobs:
   review:
-    # Auto-review on PR events, OR when someone types @claude in a PR comment.
+    # Auto-review on PR events, OR when a trusted user types @claude in a comment.
+    # Comment events run with full secrets + write token, so gate on the
+    # commenter's association to prevent anyone from triggering runs.
     if: >
       github.event_name == 'pull_request' ||
-      (github.event_name == 'issue_comment' && github.event.issue.pull_request != null && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude'))
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request != null && contains(github.event.comment.body, '@claude') && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude') && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
