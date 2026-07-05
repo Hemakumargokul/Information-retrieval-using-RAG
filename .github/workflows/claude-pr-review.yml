@@ -1,0 +1,53 @@
+name: Claude PR Review
+
+# Claude reviews pull requests and posts feedback (summary + inline comments)
+# directly in the GitHub PR UI. Runs automatically on new/updated PRs, and can
+# also be invoked on demand by commenting "@claude" on a PR.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  id-token: write
+
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # Auto-review on PR events, OR when someone types @claude in a PR comment.
+    if: >
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request != null && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Only used for auto-review (pull_request events). For @claude comments
+          # the action follows the comment instructions instead.
+          prompt: |
+            Review this pull request as a senior engineer.
+            Focus on: correctness and bugs, security issues, error handling,
+            and adherence to the repository's existing conventions and style.
+            Post specific, actionable inline comments on the relevant lines and
+            finish with a short overall summary. Be concise; skip nitpicks and
+            praise. If the PR looks good, say so briefly.
+          claude_args: '--allowedTools "Read,Glob,Grep,Bash" --max-turns 25'

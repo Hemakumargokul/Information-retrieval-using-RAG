@@ -150,6 +150,29 @@ jobs:
             claude
           delete-branch: false
 
+      - name: Claude review of the new PR
+        # PRs opened with GITHUB_TOKEN don't trigger the standalone review
+        # workflow, so we run the review inline here using the same secrets.
+        if: steps.cpr.outputs.pull-request-number != ''
+        continue-on-error: true
+        uses: anthropics/claude-code-base-action@main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: '--allowedTools "Read,Glob,Grep,Bash" --max-turns 25'
+          prompt: |
+            Review pull request #${{ steps.cpr.outputs.pull-request-number }} in this repository as a senior engineer.
+
+            1. Run `gh pr diff ${{ steps.cpr.outputs.pull-request-number }}` to see the changes.
+            2. Open any files you need for context.
+            3. Post exactly one review with:
+               `gh pr review ${{ steps.cpr.outputs.pull-request-number }} --comment --body "<your review>"`
+
+            Focus on correctness and bugs, security, error handling, and adherence
+            to the repository's existing conventions. Be specific and actionable;
+            skip nitpicks and praise. If it looks good, say so briefly.
+
       - name: Report result
         run: |
           if [ -n "${{ steps.cpr.outputs.pull-request-number }}" ]; then

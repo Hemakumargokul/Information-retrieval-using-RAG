@@ -129,10 +129,10 @@ curl -X POST \
   -d '{
     "event_type": "jira-ticket-created",
     "client_payload": {
-      "issue_key": "IR-1",
+      "issue_key": "KAN-1",
       "summary": "Add a /health endpoint",
       "description": "Add a GET /health route that returns {\"status\":\"ok\"}.",
-      "issue_url": "https://hemakumargokul.atlassian.net/browse/IR-1"
+      "issue_url": "https://hemakumargokul.atlassian.net/browse/KAN-1"
     }
   }'
 ```
@@ -145,6 +145,36 @@ Create a real ticket in Jira. Within a minute you should see a workflow run and,
 if Claude made changes, a new PR labeled `jira` + `claude`.
 
 ---
+
+---
+
+## 4. Claude PR review bot
+
+[`claude-pr-review.yml`](../.github/workflows/claude-pr-review.yml) makes Claude
+review pull requests in the GitHub UI (a summary plus inline comments).
+
+It runs:
+
+- **Automatically** on every PR `opened` / `synchronize` / `reopened`, and
+- **On demand** when someone comments **`@claude`** on a PR (or a review comment).
+
+It reuses the same `ANTHROPIC_API_KEY` secret — no extra setup needed.
+
+### Important: reviewing auto-generated PRs
+
+GitHub deliberately does **not** trigger further workflows for events raised by
+the built-in `GITHUB_TOKEN`. Because `jira-to-pr.yml` opens PRs with
+`GITHUB_TOKEN`, those PRs will **not** auto-trigger the review workflow. Two ways
+to review them:
+
+1. **Quick:** comment `@claude` on the PR — the review runs on demand.
+2. **Fully automatic:** create a PAT secret and have the PR opened with it so the
+   `pull_request` event fires:
+   - Add repo secret `GH_PAT` (fine-grained: Contents + Pull requests: read/write).
+   - In `jira-to-pr.yml`, change the create-PR step to
+     `token: ${{ secrets.GH_PAT }}`.
+
+Human-opened PRs are always auto-reviewed.
 
 ## Notes & tuning
 
